@@ -156,9 +156,8 @@ fun TaskListScreen(viewModel: TaskViewModel,navController:NavHostController){
                                 Toast.makeText(context,"The task name is empty",Toast.LENGTH_SHORT).show()
                             }
                             taskName=""
-
-
-                        })
+                        }),
+                        singleLine = true, maxLines = 1
                     )
                 }
             }

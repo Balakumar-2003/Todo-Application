@@ -77,7 +77,7 @@ fun SearchScreen(navController: NavHostController,viewModel: TaskViewModel,inner
                 Icon(imageVector = Icons.Default.Search,
                     contentDescription = "search icon",
                     tint = Color.Black)
-            } })
+            } }, maxLines = 1, singleLine = true)
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             itemsIndexed(taskList, key = {index,item->item.id?:0}){index,item->
                 TaskCard(navController,viewModel,item, onDelete = {scope.launch {
