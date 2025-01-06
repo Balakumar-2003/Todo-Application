@@ -1,5 +1,6 @@
 package com.balakumar.todo.presentation.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import androidx.compose.ui.util.lerp
 import kotlin.math.absoluteValue
 
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskList(viewModel: TaskViewModel,innerPadding:PaddingValues,navController:NavHostController){
@@ -84,7 +86,12 @@ fun TaskList(viewModel: TaskViewModel,innerPadding:PaddingValues,navController:N
                                 .fillMaxSize()
                                 .padding(top = 4.dp, bottom = 4.dp, start = 8.dp, end = 6.dp)
                                 .weight(1f)
-                                .clickable(onClick = { viewModel.clickedFilter(0) }),
+                                .clickable(onClick = { viewModel.clickedFilter(0)
+                                    scope.launch {
+                                        pageState.scrollToPage(0)
+                                    }
+                               }
+                                ),
                             shape = RoundedCornerShape(40),
                             color = Color(if (clicked == 0) 0xFFFFFFFF else 0xFFF8F9FE)
                         ) {
@@ -105,7 +112,10 @@ fun TaskList(viewModel: TaskViewModel,innerPadding:PaddingValues,navController:N
                                 .fillMaxSize()
                                 .padding(top = 4.dp, bottom = 4.dp, start = 6.dp, end = 6.dp)
                                 .weight(1f)
-                                .clickable(onClick = { viewModel.clickedFilter(1) }),
+                                .clickable(onClick = { viewModel.clickedFilter(1)
+                                    scope.launch {
+                                        pageState.scrollToPage(1)
+                                    }}),
                             shape = RoundedCornerShape(40),
                             color = Color(if (clicked == 1) 0xFFFFFFFF else 0xFFF8F9FE)
                         ) {
@@ -126,7 +136,10 @@ fun TaskList(viewModel: TaskViewModel,innerPadding:PaddingValues,navController:N
                                 .fillMaxSize()
                                 .padding(top = 4.dp, bottom = 4.dp, start = 6.dp, end = 8.dp)
                                 .weight(1f)
-                                .clickable(onClick = { viewModel.clickedFilter(2) }),
+                                .clickable(onClick = { viewModel.clickedFilter(2)
+                                    scope.launch {
+                                        pageState.scrollToPage(2)
+                                    }}),
                             shape = RoundedCornerShape(40),
                             color = Color(if (clicked == 2) 0xFFFFFFFF else 0xFFF8F9FE)
                         ) {

@@ -3,6 +3,7 @@ package com.balakumar.todo.presentation.screens
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,22 +15,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +66,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -71,14 +80,28 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
     var taskLabel by remember { mutableStateOf(newTask.label) }
     val simpleFormatter = SimpleDateFormat("yyyy-mm-dd", Locale.getDefault())
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val date= LocalDate.now()
     var create by remember { mutableStateOf(simpleFormatter.format(newTask.createdDate)) }
 
     var taskDescription by remember { mutableStateOf(newTask.description) }
     var taskStartDate by remember { mutableStateOf(simpleFormatter.format(newTask.startDate)) }
     var taskEndDate by remember { mutableStateOf(simpleFormatter.format(newTask.endDate)) }
     val startdateState = rememberSheetState()
-
+    var taskStatus by remember {
+        mutableStateOf(newTask.status)
+    }
+    val status by remember {
+        derivedStateOf{
+            when(taskStatus){
+                0->"To do works"
+                1->"In progress works"
+                else->"Finished work"
+            }
+        }
+    }
+    var expand by remember {
+        mutableStateOf(false)
+    }
+    val option = listOf("To do works","In progress works","Finished work")
 
     CalendarDialog(state = startdateState, selection = CalendarSelection.Date{ date ->
         try {
@@ -98,7 +121,9 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
         }
 
     })
-    Column (modifier = Modifier.fillMaxSize().padding(innerpadding),
+    Column (modifier = Modifier
+        .fillMaxSize()
+        .padding(innerpadding),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top){
         Text(text = "Task Name",
@@ -107,8 +132,10 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                 .fillMaxWidth()
                 .padding(8.dp),
             style = MaterialTheme.typography.headlineLarge)
-        OutlinedTextField(value=taskName, onValueChange = { taskName=it}, modifier = Modifier.fillMaxWidth()
-            .height(70.dp).padding(8.dp),
+        OutlinedTextField(value=taskName, onValueChange = { taskName=it}, modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(8.dp),
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
             ),
@@ -128,8 +155,10 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                 .padding(8.dp),
             style = MaterialTheme.typography.headlineLarge)
         OutlinedTextField(value=taskLabel, onValueChange = {
-            taskLabel=it}, modifier = Modifier.fillMaxWidth()
-            .height(70.dp).padding(8.dp),
+            taskLabel=it}, modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(8.dp),
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
             ),
@@ -149,8 +178,10 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                 .padding(8.dp),
             style = MaterialTheme.typography.headlineLarge)
         OutlinedTextField(value=taskDescription, onValueChange = {
-            taskDescription=it}, modifier = Modifier.fillMaxWidth()
-            .height(70.dp).padding(8.dp),
+            taskDescription=it}, modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .padding(8.dp),
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
             ),
@@ -163,13 +194,57 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                     containerColor = Color(0xFFB4DBFF)
                 ),
             singleLine = true, maxLines = 1)
+        Text(text = "Status",
+             fontSize = 16.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            style = MaterialTheme.typography.headlineLarge)
+        ExposedDropdownMenuBox(expanded = expand, onExpandedChange = {expand=it}) {
+            OutlinedTextField(value=status, onValueChange = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .padding(8.dp)
+                    .menuAnchor(),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = {focusmanager.moveFocus(FocusDirection.Down)}
+                ),
+                colors = TextFieldDefaults
+                    .outlinedTextFieldColors(unfocusedBorderColor =
+                    Color(0xFF000000),
+                        containerColor = Color(0xFFB4DBFF)
+                    ),
+                singleLine = true, maxLines = 1)
+            ExposedDropdownMenu(expanded = expand, onDismissRequest = { expand=false }, modifier =
+            Modifier.width(160.dp)
+                .wrapContentHeight()
+            ) {
+                option.forEach{state->
+                   DropdownMenuItem(text = { Text(text = state) }, onClick = {
+                       taskStatus=when(state){
+                           "To do works"->0
+                           "In progress works"->1
+                           else->2
+                       }
+                   expand=false},
+                       colors = MenuDefaults.itemColors(Color(0xFF000000)),
+                       modifier = Modifier.fillMaxSize())
+                }
+            }
+        }
         Text(text = "Date",
             fontSize = 16.sp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
             style = MaterialTheme.typography.headlineLarge)
-        Row (modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+        Row (modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.Bottom){
             TextField(value = taskStartDate, onValueChange = {taskStartDate=it},
@@ -192,7 +267,9 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
             }
 
         }
-        Row (modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+        Row (modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.Bottom){
             TextField(value = taskEndDate, onValueChange = {taskEndDate=it},
@@ -234,6 +311,7 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                             if(newTask.startDate==newTask.createdDate){
                                 newTask.status=1
                             }
+                            newTask.status=taskStatus
                             viewModel.updateTask.value=newTask
                             scope.launch {
                                 viewModel.updateTask()
@@ -257,7 +335,8 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
 
         }
         Spacer(modifier = Modifier.height(36.dp))
-        Box(modifier = Modifier.fillMaxWidth()
+        Box(modifier = Modifier
+            .fillMaxWidth()
             .wrapContentHeight()
             .padding(2.dp),
             contentAlignment = Alignment.Center){
@@ -293,6 +372,7 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                     if(newTask.startDate==newTask.createdDate){
                         newTask.status=1
                     }
+                    newTask.status=taskStatus
                     viewModel.updateTask.value=newTask
                     scope.launch {
                         viewModel.updateTask()
@@ -300,7 +380,8 @@ fun TaskEditScreen(viewModel: TaskViewModel, navController: NavHostController, i
                     navController.navigate("taskListScreen")
                 }
             }, modifier = Modifier
-                .wrapContentHeight().wrapContentWidth(),
+                .wrapContentHeight()
+                .wrapContentWidth(),
                 shape= RoundedCornerShape(40),
                 colors = ButtonDefaults.buttonColors(
                     Color(0xFF006FFD)
